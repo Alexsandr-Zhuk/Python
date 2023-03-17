@@ -1,0 +1,38 @@
+import csv
+
+filename = "shoplist.csv"
+
+shoplist = [{"name"},
+            {"weight"},
+            {"price"}
+
+            ]
+
+with open(filename, "w", encoding="utf-8", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerows(shoplist)
+
+with open(filename, "r", newline="") as file:
+    reader = csv.reader(file)
+    for row in reader:
+        print(row)
+        
+# с использованием DictWriter     
+        
+import csv
+filename = "shop_lict.csv"
+
+shop_lict = [
+    {"name":"apples", "weight": 0,"price": 2 },
+    ]
+
+with open(filename, "w", newline="") as file:
+    fieldnames = ["name", "weight","price"]
+    writer = csv.DictWriter(file, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(shop_lict)
+
+with open(filename, "r", newline="") as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        print(row["name"], ":", row["weight"],":",row["price"])
