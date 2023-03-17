@@ -1,0 +1,61 @@
+# шаблон для парсинга сайтов и сохрание данных в csv формате
+
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+CSV = 'cards.csv'
+host = 'https://myfin.by/'
+url = 'https://myfin.by/karty'
+headers = {
+    "accept": "*/*",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+}
+
+
+def get_html(url, params=''):
+    r = requests.get(url, headers=headers, params=params)
+    return r
+
+
+def get_content(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    items = soup.find_all('div', class_='products__product-info')
+    cards = []
+
+    for item in items:
+        cards.append(
+            {
+                'name': item.find('div', class_='products__product-product-name').get_text(strip=True),
+                'links': host + item.find('div', class_='products__product-product-name').find('a').get('href'),
+                'brand': item.find('div', class_='products__product-bank-name').get_text(strip=True),
+            }
+        )
+    return cards
+
+
+def save_doc(items, path):
+    with open(path, 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=';')
+        writer.writerow(['Название карты', 'Ссылка', 'Банк'])
+        for item in items:
+            writer.writerow([item['name'], item['links'], item['brand']])
+
+
+def parser():
+    pages = input('Укажите количество станиц:')
+    pages = int(pages)
+    html = get_html(url)
+    if html.status_code == 200:
+        cards = []
+        for pages in range(1, pages):
+            print(f'Парсим страницу: {pages}')
+            html = get_html(url, params={'pages': pages})
+            cards.extend(get_content(html.text))
+            save_doc(cards, CSV)
+        pass
+    else:
+        print('Error')
+
+
+parser()
